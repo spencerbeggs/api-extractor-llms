@@ -3,32 +3,15 @@
 This file provides guidance to Claude Code when working with code in this
 repository.
 
-## Project Status
+## Project Overview
 
-This is a **base template repository** for developing and publishing Node.js
-modules to npm and GitHub Packages. It is not a working library — it contains
-placeholder source code in `src/` that should be replaced when starting a new
-project.
+`api-extractor-llms` is a standalone library that renders Microsoft API Extractor `.api.json` models into LLM-lean markdown. The rendered body of each doc is identical across consumers; only the prepended frontmatter and the crosslink URL scheme differ, and both are injected services supplied by the caller. The library was extracted from `savvy-web/systems` to be published and reused independently (by `@savvy-web/systems` and, in a follow-up, by `rspress-plugin-api-extractor`).
 
-The design documentation system is available via Claude Code skills and agents
-but no design docs exist yet in this template.
+Source lives in `src/`: `index.ts` (public barrel), `model-loader.ts`, `render.ts`, `formatter.ts`, `cross-linker.ts`, `tsdoc.ts`, and `types.ts`.
 
-## Getting Started (After Cloning This Template)
-
-When starting a new project from this template, follow this lifecycle:
-
-1. **Rename the package** — Update `name` in `package.json` (e.g.,
-   `@spencerbeggs/my-new-lib`), update `repository.url` and `homepage`, and
-   update the `repo` field in `.changeset/config.json`
-2. **Replace placeholder code** — Delete the example `Foo`/`Bar` code in
-   `src/index.ts` and `src/index.test.ts`
-3. **Initialize design documentation** — Run `/design-init` to create your
-   first design document describing the library's architecture
-4. **Follow the design-first workflow** — Design docs → `/plan-create` →
-   implementation. This ensures Claude understands the full architecture before
-   writing code
-5. **Implement iteratively** — Use the plan to guide implementation, updating
-   design docs as the architecture evolves
+**For architecture, the load-bearing design decision, module boundaries, and data flow:**
+→ `@.claude/design/api-extractor-llms/architecture.md`
+Load when: changing the render pipeline, the injected frontmatter/route services, or module boundaries.
 
 ## Build Pipeline
 
@@ -39,7 +22,8 @@ produce dual build outputs via [Rslib](https://rslib.rs/):
 | Output | Directory | Purpose |
 | ------ | --------- | ------- |
 | Development | `dist/dev/` | Local development with source maps |
-| Production | `dist/npm/` | Published to npm and GitHub Packages |
+| npm | `dist/npm/` | Published to the npm registry (unscoped `api-extractor-llms`) |
+| GitHub Packages | `dist/github/` | Published to GitHub Packages (scoped `@spencerbeggs/api-extractor-llms`) |
 
 ### How `private: true` Works
 
@@ -58,8 +42,11 @@ manually set `"private": false` in the source `package.json`.
 
 The `publishConfig.targets` array defines where packages are published:
 
-- **GitHub Packages** — `https://npm.pkg.github.com/` (from `dist/npm/`)
-- **npm registry** — `https://registry.npmjs.org/` (from `dist/npm/`)
+- **GitHub Packages** — `https://npm.pkg.github.com/` (from `dist/github/`); the
+  `rslib.config.ts` `transform()` renames the package to
+  `@spencerbeggs/api-extractor-llms` for this target only
+- **npm registry** — `https://registry.npmjs.org/` (from `dist/npm/`), unscoped
+  as `api-extractor-llms` — the canonical name
 
 Both targets publish with provenance attestation enabled.
 
@@ -75,9 +62,7 @@ Both targets publish with provenance attestation enabled.
 
 ## Savvy-Web Tool References
 
-This template depends on several `@savvy-web/*` packages. These are in active
-development — if behavior seems unexpected, explore both the GitHub docs and the
-installed source.
+This project depends on several `@savvy-web/*` packages. These are in active development — if behavior seems unexpected, explore both the GitHub docs and the installed source.
 
 | Package | Purpose | GitHub | Local Source |
 | ------- | ------- | ------ | ------------ |
@@ -118,7 +103,7 @@ pnpm run build:inspect     # Inspect production build config (verbose)
 ### Running a Specific Test
 
 ```bash
-pnpm vitest run src/index.test.ts
+pnpm vitest run __test__/render.test.ts
 ```
 
 ## Code Quality and Hooks
@@ -154,7 +139,7 @@ preset from `@savvy-web/lint-staged`.
 
 - Use `.js` extensions for relative imports (ESM requirement)
 - Use `node:` protocol for Node.js built-ins (e.g., `import fs from 'node:fs'`)
-- Separate type imports: `import type { Foo } from './bar.js'`
+- Separate type imports: `import type { RenderedDoc } from './types.js'`
 
 ### Commits
 
