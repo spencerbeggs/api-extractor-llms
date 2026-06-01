@@ -1,4 +1,3 @@
-// packages/api-extractor-llms/src/render.ts
 /**
  * The single markdown output system. Renders an API Extractor item's body
  * (shared across consumers) and assembles it with an injected frontmatter block

@@ -1,4 +1,3 @@
-// packages/api-extractor-llms/src/tsdoc.ts
 /**
  * Pure TSDoc + API-model extraction helpers, ported from
  * rspress-plugin-api-extractor's ApiParser. Each reads documentation off an

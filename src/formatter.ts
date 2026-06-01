@@ -1,4 +1,3 @@
-// packages/api-extractor-llms/src/formatter.ts
 /**
  * Format an API Extractor Excerpt into a clean type signature string. Ported
  * from rspress-plugin-api-extractor's TypeSignatureFormatter. Pure.
@@ -49,19 +48,8 @@ export class TypeSignatureFormatter {
 		}
 		if (currentLine.trim()) lines.push(currentLine.trimEnd());
 
-		if (lines.length <= 1) {
-			let result = "";
-			let last = "";
-			for (let i = 0; i < tokens.length; i++) {
-				let tokenText = tokens[i].text;
-				if (i === 0) tokenText = this.stripExportDeclare(tokenText);
-				if (tokenText.trim() === "") continue;
-				if (last && this.needsSpaceBefore(last, tokenText)) result += " ";
-				result += tokenText;
-				last = tokenText;
-			}
-			return result.trimStart();
-		}
+		// No wrap needed: the first pass already assembled the single line.
+		if (lines.length <= 1) return lines.length === 1 ? lines[0].trimStart() : "";
 
 		return this.stripExportDeclare(lines.join("\n"));
 	}

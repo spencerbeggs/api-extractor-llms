@@ -29,7 +29,7 @@ export class CrossLinker {
 			const ref = this.byName.get(name);
 			if (!ref) continue;
 			const route = this.routeFor(ref);
-			const regex = new RegExp(`\\b${escapeRegExp(name)}\\b(?![a-zA-Z])`, "g");
+			const regex = new RegExp(`\\b${escapeRegExp(name)}\\b`, "g");
 			result = result.replace(regex, (match, offset: number) => {
 				const before = result.slice(0, offset);
 				if (before.endsWith("](") || before.endsWith("[")) return match; // already a link
