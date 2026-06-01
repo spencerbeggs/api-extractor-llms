@@ -1,73 +1,83 @@
-# pnpm-module-template
+# api-extractor-llms
 
-A personal template repository by
-[C. Spencer Beggs](https://spencerbeg.gs) for developing and publishing Node.js
-modules to [npm](https://www.npmjs.com/) and
-[GitHub Packages](https://github.com/features/packages).
+[![npm](https://img.shields.io/npm/v/api-extractor-llms?label=npm&color=cb3837)](https://www.npmjs.com/package/api-extractor-llms)
+[![License: MIT](https://img.shields.io/badge/License-MIT-4caf50.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-5fa04e.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178c6.svg)](https://www.typescriptlang.org/)
 
-You're welcome to clone or fork this template for your own use.
+Turn a Microsoft API Extractor `.api.json` model into plain markdown that reads cleanly for both people and language models. You get one markdown document per top-level export — an H1, the summary, a fenced `ts` signature, parameters, returns, container members and examples — with no site chrome, no HTML and no framework coupling.
 
-## What's Included
+## Why api-extractor-llms
 
-- **Build pipeline** — Dual-output builds (development + production) via
-  [Rslib](https://rslib.rs/) with automatic `package.json` transformation for
-  publishing
-- **Code quality** — [Biome](https://biomejs.dev/) for linting and formatting,
-  with git hooks for pre-commit checks and commit message validation
-- **Testing** — [Vitest](https://vitest.dev/) with v8 coverage
-- **Versioning** — [Changesets](https://github.com/changesets/changesets) for
-  version management and changelog generation
-- **CI/CD** — GitHub Actions for automated testing, building, and publishing
-  with provenance attestation
-- **TypeScript** — Strict mode, composite builds, ESM-first with `.js` import
-  extensions
+API Extractor already understands your `.d.ts` surface. What it will not do is hand you docs you can drop into a prompt, a wiki or a static site. That is the gap this package closes. The body of every rendered doc stays the same no matter where it ends up. Two things change between consumers: the frontmatter block at the top and the URL scheme for cross-links. You inject both, so one renderer feeds an RSPress site, an MCP server or a folder of bare `.md` files.
 
-## Quick Start
+## Install
 
-1. Click **"Use this template"** on GitHub (or clone the repo directly)
-2. Update `package.json` with your package name, repository URL, and homepage
-3. Update the `repo` field in `.changeset/config.json`
-4. Replace the placeholder code in `src/` with your own
-5. Install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-
-6. Start developing:
-
-   ```bash
-   pnpm run test:watch    # Run tests in watch mode
-   pnpm run lint:fix      # Auto-fix lint issues
-   pnpm run build         # Build dev + prod outputs
-   ```
-
-## Project Structure
-
-```text
-src/               Source code and tests
-lib/configs/       Shared tool configurations (commitlint, lint-staged, markdownlint)
-dist/dev/          Development build output
-dist/npm/          Production build output (published to registries)
-.github/workflows/ CI/CD workflows
-.changeset/        Changeset configuration
+```bash
+npm install api-extractor-llms
+# or
+pnpm add api-extractor-llms
 ```
 
-## Publishing
+The package is also published to GitHub Packages as `@spencerbeggs/api-extractor-llms` if you prefer the scoped name; point your registry at `https://npm.pkg.github.com` for that scope and install it the same way.
 
-Packages are published to both npm and GitHub Packages with provenance
-attestation. The build pipeline automatically transforms `package.json` for
-publishing — the source file stays `"private": true` and the builder handles the
-rest.
+This is an ESM-only package. Import it from a module context (`"type": "module"` or `.mjs`).
 
-See the [Changesets documentation](https://github.com/changesets/changesets) for
-how versioning and releases work.
+## Quick start
 
-## Claude Code
+Load a model, render it, then write each doc wherever you want. The library does no I/O of its own. File writing is yours.
 
-This template includes configuration for
-[Claude Code](https://docs.anthropic.com/en/docs/claude-code). See
-[CLAUDE.md](CLAUDE.md) for details on the design-first development workflow.
+```ts
+import { mkdir, writeFile } from "node:fs/promises";
+import { loadApiModel, renderPackage } from "api-extractor-llms";
+
+const pkg = await loadApiModel("./temp/my-pkg.api.json");
+
+const docs = renderPackage(pkg, {
+  packageName: "my-pkg",
+  routeFor: (ref) => `/api/${ref.slug}`,
+});
+
+await mkdir("./out", { recursive: true });
+for (const doc of docs) {
+  await writeFile(`./out/${doc.slug}.md`, doc.markdown);
+}
+
+console.log(docs.map((d) => `${d.kind}: ${d.name}`));
+// e.g. [ 'function: loadApiModel', 'class: CrossLinker', 'type: RenderedDoc' ]
+// (the actual list depends on your model's exports)
+```
+
+Each entry in the returned array is a `RenderedDoc` with `name`, `kind`, `slug`, `summary`, `packageName` and the assembled `markdown`.
+
+### Inject frontmatter
+
+Pass a `frontmatter` function to prepend a block — YAML, TOML or whatever your target expects. Omit it for bare bodies.
+
+```ts
+const docs = renderPackage(pkg, {
+  packageName: "my-pkg",
+  frontmatter: (meta) => `---\ntitle: ${meta.name}\nkind: ${meta.kind}\n---\n\n`,
+});
+
+console.log(docs[0].markdown.startsWith("---"));
+// true
+```
+
+`routeFor` and `frontmatter` are independent. Supply either, both or neither.
+
+## Features
+
+- `loadApiModel(path)` reads a `.api.json` file from disk and returns its `ApiPackage`.
+- `renderPackage(pkg, opts)` walks the first entry point and returns one `RenderedDoc` per top-level member.
+- `renderItem(item, opts)` renders a single API item to a markdown body, with an optional `CrossLinker`.
+- `CrossLinker` wraps known item names in prose with links, skipping code spans and existing links, using your injected route scheme.
+- `TypeSignatureFormatter` formats an API Extractor `Excerpt` into a clean type signature, wrapping long unions across lines.
+- TSDoc helpers — `getSummary`, `getParams`, `getReturns`, `getExamples`, `getDeprecation`, `getReleaseTag`, `hasModifierTag` and `extractPlainText` — pull plain data off an `ApiItem` with no rendering.
+
+## Generating a model
+
+This package consumes the JSON that [Microsoft API Extractor](https://api-extractor.com/) produces. Run API Extractor against your project first with `docModel.enabled` set in your `api-extractor.json`, then feed the resulting `.api.json` to `loadApiModel`.
 
 ## License
 

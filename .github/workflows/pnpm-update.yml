@@ -56,6 +56,7 @@ jobs:
             @savvy-web/pnpm-plugin-silk
           dependencies: |
             @savvy-web/*
+            @microsoft/*
           run: |
             pnpm savvy-commit init
             pnpm savvy-lint init

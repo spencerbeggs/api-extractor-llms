@@ -1,15 +1,15 @@
 {
-	"name": "@spencerbeggs/pnpm-module-template",
+	"name": "api-extractor-llms",
 	"version": "0.0.0",
-	"private": true,
-	"description": "A template repository for developing and deploying Node.js modules from a pnpm monorepo structure.",
-	"homepage": "https://github.com/spencerbeggs/pnpm-module-template#readme",
+	"description": "Render Microsoft API Extractor models into LLM-lean markdown. Pure model loading, TSDoc extraction, type-signature formatting, and per-item markdown rendering.",
+	"keywords": ["api-extractor", "tsdoc", "llms", "documentation", "markdown", "typescript", "esm"],
+	"homepage": "https://github.com/spencerbeggs/api-extractor-llms#readme",
 	"bugs": {
-		"url": "https://github.com/spencerbeggs/pnpm-module-template/issues"
+		"url": "https://github.com/spencerbeggs/api-extractor-llms/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/spencerbeggs/pnpm-module-template.git"
+		"url": "git+https://github.com/spencerbeggs/api-extractor-llms.git"
 	},
 	"license": "MIT",
 	"author": {
@@ -17,6 +17,7 @@
 		"email": "spencer@beggs.codes",
 		"url": "https://spencerbeg.gs"
 	},
+	"sideEffects": false,
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts"
@@ -42,12 +43,33 @@
 		"typecheck": "turbo run types:check --log-prefix=none --log-order=grouped",
 		"types:check": "tsgo --noEmit"
 	},
+	"dependencies": {
+		"@microsoft/api-extractor-model": "^7.33.8",
+		"@microsoft/tsdoc": "^0.16.0"
+	},
 	"devDependencies": {
 		"@savvy-web/changesets": "^0.10.1",
 		"@savvy-web/commitlint": "^0.10.1",
 		"@savvy-web/lint-staged": "^1.2.1",
 		"@savvy-web/rslib-builder": "^0.20.12",
-		"@savvy-web/vitest": "^1.3.2"
+		"@savvy-web/vitest": "^1.3.2",
+		"@types/node": "catalog:silk"
+	},
+	"peerDependencies": {
+		"@types/node": "catalog:silkPeers",
+		"@typescript/native-preview": "catalog:silkPeers",
+		"typescript": "catalog:silkPeers"
+	},
+	"peerDependenciesMeta": {
+		"@types/node": {
+			"optional": false
+		},
+		"@typescript/native-preview": {
+			"optional": false
+		},
+		"typescript": {
+			"optional": false
+		}
 	},
 	"packageManager": "pnpm@10.34.1+sha512.b58fbde6dca66a929538021581f648b4570b6ca19b18e7cbd7f2c07a7b24454155388dacdf08f2af3678e88a6d1fe04f9d609df24bf51735a060ea041b374ab7",
 	"devEngines": {
@@ -72,7 +94,7 @@
 			{
 				"protocol": "npm",
 				"registry": "https://npm.pkg.github.com/",
-				"directory": "dist/npm",
+				"directory": "dist/github",
 				"access": "public",
 				"provenance": true
 			},
