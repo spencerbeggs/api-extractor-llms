@@ -47,8 +47,8 @@
 		"@microsoft/tsdoc": "^0.16.0"
 	},
 	"devDependencies": {
-		"@savvy-web/bundler": "^0.4.0",
-		"@savvy-web/silk": "^0.4.2",
+		"@savvy-web/bundler": "^0.4.2",
+		"@savvy-web/silk": "^1.0.0",
 		"@savvy-web/vitest": "^1.5.0"
 	},
 	"peerDependencies": {
