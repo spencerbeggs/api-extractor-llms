@@ -7,6 +7,11 @@
 
 import type { Excerpt } from "@microsoft/api-extractor-model";
 
+/**
+ * Formats an API Extractor `Excerpt` into a clean, line-wrapped type signature string.
+ *
+ * @public
+ */
 export class TypeSignatureFormatter {
 	private readonly maxLineLength: number;
 	private readonly indent: string;

@@ -11,6 +11,12 @@ import type { ApiItemRef, RouteFormatter } from "./types.js";
 
 const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+/**
+ * Links known API item names in prose to their docs, using an injected
+ * {@link RouteFormatter} so each consumer supplies its own URL scheme.
+ *
+ * @public
+ */
 export class CrossLinker {
 	private readonly byName: ReadonlyMap<string, ApiItemRef>;
 	private readonly routeFor: RouteFormatter;

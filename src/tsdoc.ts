@@ -10,7 +10,11 @@ import type { ApiItem } from "@microsoft/api-extractor-model";
 import { ApiDocumentedItem, ApiReleaseTagMixin, ReleaseTag } from "@microsoft/api-extractor-model";
 import type { DocNode } from "@microsoft/tsdoc";
 
-/** Recursively flatten a TSDoc DocNode tree to plain text (code spans → backticks). */
+/**
+ * Recursively flatten a TSDoc DocNode tree to plain text (code spans → backticks).
+ *
+ * @public
+ */
 export function extractPlainText(node: DocNode): string {
 	// biome-ignore lint/suspicious/noExplicitAny: TSDoc node internals require dynamic access
 	const nodeAny = node as any;
@@ -34,7 +38,11 @@ export function extractPlainText(node: DocNode): string {
 	return parts.join("");
 }
 
-/** The TSDoc `@summary` section as a single cleaned line. */
+/**
+ * The TSDoc `@summary` section as a single cleaned line.
+ *
+ * @public
+ */
 export function getSummary(item: ApiItem): string {
 	if (item instanceof ApiDocumentedItem) {
 		const tsdoc = item.tsdocComment;
@@ -45,7 +53,11 @@ export function getSummary(item: ApiItem): string {
 	return "";
 }
 
-/** `@param` blocks merged with parameter types from the declaration excerpt. */
+/**
+ * `@param` blocks merged with parameter types from the declaration excerpt.
+ *
+ * @public
+ */
 export function getParams(item: ApiItem): Array<{ name: string; type?: string; description: string }> {
 	const out: Array<{ name: string; type?: string; description: string }> = [];
 	const paramTypes = new Map<string, string>();
@@ -80,7 +92,11 @@ export function getParams(item: ApiItem): Array<{ name: string; type?: string; d
 	return out;
 }
 
-/** The `@returns` block description, if present. */
+/**
+ * The `@returns` block description, if present.
+ *
+ * @public
+ */
 export function getReturns(item: ApiItem): { description: string } | null {
 	if (item instanceof ApiDocumentedItem) {
 		const tsdoc = item.tsdocComment;
@@ -95,7 +111,11 @@ export function getReturns(item: ApiItem): { description: string } | null {
 	return null;
 }
 
-/** All `@example` fenced-code blocks (falls back to plain text). */
+/**
+ * All `@example` fenced-code blocks (falls back to plain text).
+ *
+ * @public
+ */
 export function getExamples(item: ApiItem): Array<{ language: string; code: string }> {
 	const examples: Array<{ language: string; code: string }> = [];
 	if (!(item instanceof ApiDocumentedItem)) return examples;
@@ -119,7 +139,11 @@ export function getExamples(item: ApiItem): Array<{ language: string; code: stri
 	return examples;
 }
 
-/** Reads the deprecation-block message from an ApiItem, if one is present. */
+/**
+ * Reads the deprecation-block message from an ApiItem, if one is present.
+ *
+ * @public
+ */
 export function getDeprecation(item: ApiItem): { message: string } | null {
 	if (item instanceof ApiDocumentedItem) {
 		const tsdoc = item.tsdocComment;
@@ -134,7 +158,11 @@ export function getDeprecation(item: ApiItem): { message: string } | null {
 	return null;
 }
 
-/** The release tag (Public/Beta/Alpha/Internal) or "Public" when absent. */
+/**
+ * The release tag (Public/Beta/Alpha/Internal) or "Public" when absent.
+ *
+ * @public
+ */
 export function getReleaseTag(item: ApiItem): string {
 	if (ApiReleaseTagMixin.isBaseClassOf(item)) {
 		switch (item.releaseTag) {
@@ -153,7 +181,11 @@ export function getReleaseTag(item: ApiItem): string {
 	return "Public";
 }
 
-/** True when the item carries the given TSDoc modifier tag (without the `@`). */
+/**
+ * True when the item carries the given TSDoc modifier tag (without the `@`).
+ *
+ * @public
+ */
 export function hasModifierTag(item: ApiItem, tagName: string): boolean {
 	if (item instanceof ApiDocumentedItem) {
 		const tsdoc = item.tsdocComment;

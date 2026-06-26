@@ -28,8 +28,10 @@ const KIND_SLUG: Readonly<Record<string, ItemKindSlug>> = {
  * The default emit rule for {@link renderPackage}: drop compiler-synthetic
  * forgotten exports — items the model retains only because API Extractor ran with
  * `includeForgottenExports: true` (e.g. the `*_base` classes TypeScript hoists for
- * Effect class mixins). Those carry `isExported === false` on {@link ApiExportedMixin}.
+ * Effect class mixins). Those carry `isExported === false` on `ApiExportedMixin`.
  * Every other item, including any lacking the flag, is kept.
+ *
+ * @public
  */
 export const isEmittable = (item: ApiItem): boolean => (item as Partial<ApiExportedMixin>).isExported !== false;
 
@@ -40,13 +42,23 @@ const signatureOf = (item: ApiItem): string => {
 	return declared.excerpt?.text ? formatter.format(declared.excerpt).trim() : "";
 };
 
+/**
+ * Options for {@link renderItem}: the package name used in fallbacks and an
+ * optional crosslinker applied to the rendered prose.
+ *
+ * @public
+ */
 export interface RenderItemOptions {
 	readonly packageName: string;
 	/** Optional crosslinker applied to prose (summaries, params, returns, deprecation). */
 	readonly crossLinker?: CrossLinker;
 }
 
-/** Render one API item to a markdown body (no frontmatter). */
+/**
+ * Render one API item to a markdown body (no frontmatter).
+ *
+ * @public
+ */
 export function renderItem(item: ApiItem, opts: RenderItemOptions): string {
 	const link = (text: string): string => (opts.crossLinker ? opts.crossLinker.addLinks(text) : text);
 	const lines: string[] = [`# ${item.displayName}`, ""];
@@ -97,7 +109,11 @@ export function renderItem(item: ApiItem, opts: RenderItemOptions): string {
 	return `${lines.join("\n").trim()}\n`;
 }
 
-/** Walk a package's first entry point and assemble one RenderedDoc per top-level member. */
+/**
+ * Walk a package's first entry point and assemble one RenderedDoc per top-level member.
+ *
+ * @public
+ */
 export function renderPackage(apiPackage: ApiPackage, opts: RenderPackageOptions): RenderedDoc[] {
 	const entryPoint = apiPackage.entryPoints[0];
 	if (!entryPoint) return [];
