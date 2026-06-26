@@ -11,7 +11,11 @@ import { resolve } from "node:path";
 import type { ApiPackage } from "@microsoft/api-extractor-model";
 import { ApiModel } from "@microsoft/api-extractor-model";
 
-/** Load a `.api.json` model file and return its first (only) package. */
+/**
+ * Load a `.api.json` model file and return its first (only) package.
+ *
+ * @public
+ */
 export async function loadApiModel(modelPath: string): Promise<ApiPackage> {
 	const resolved = resolve(modelPath);
 	if (!existsSync(resolved)) {

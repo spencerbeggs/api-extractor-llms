@@ -8,7 +8,7 @@
 export { CrossLinker } from "./cross-linker.js";
 export { TypeSignatureFormatter } from "./formatter.js";
 export { loadApiModel } from "./model-loader.js";
-export { type RenderItemOptions, renderItem, renderPackage } from "./render.js";
+export { type RenderItemOptions, isEmittable, renderItem, renderPackage } from "./render.js";
 export {
 	extractPlainText,
 	getDeprecation,

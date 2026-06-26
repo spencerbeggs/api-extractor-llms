@@ -3,8 +3,8 @@ status: current
 module: api-extractor-llms
 category: architecture
 created: 2026-06-01
-updated: 2026-06-01
-last-synced: 2026-06-01
+updated: 2026-06-26
+last-synced: 2026-06-26
 completeness: 90
 related: []
 dependencies: []
@@ -65,7 +65,7 @@ plugin differ in exactly two ways: the frontmatter block at the top of each doc 
 YAML vs RSPress front-matter) and the crosslink URL scheme (`silk://packages/<pkg>/api/…`
 vs `/packages/<pkg>/api/…`). Duplicating body rendering to accommodate these differences
 would produce two diverging forks that must be kept in sync. Instead, `render.ts` exposes
-two injection points:
+two injection points for these consumer differences:
 
 - **`FrontmatterRenderer`** — a function `(meta: DocMeta) => string` that produces the
   frontmatter block (including trailing blank line) for one doc, or `""` for no
@@ -79,6 +79,8 @@ bare bodies — useful for tests and for a plain dump without consumer-specific 
 The `CrossLinker` receives the `RouteFormatter` at construction and uses it whenever it
 inlines a link. This is the only place the URL scheme appears; the scanner (whole-word
 matching, skip code spans and existing links, longest-name-first) is fully shared.
+
+A third seam, **`filter`**, decides corpus membership rather than per-doc output: a predicate `(item: ApiItem) => boolean` choosing which top-level entry-point members are emitted. It differs from the other two in that it is default-on. When omitted, `renderPackage` applies the exported `isEmittable` rule, which drops compiler-synthetic forgotten exports — items the model carries only because API Extractor runs `includeForgottenExports: true` (the `*_base` classes TypeScript hoists for Effect class mixins, surfaced with `isExported === false`). Passing a `filter` fully replaces the default, so callers that want their own rule alongside the forgotten-export drop compose `(i) => isEmittable(i) && myRule(i)`. The model keeps the dropped symbols; only the rendered corpus excludes them. See `isEmittable` and `renderPackage` in `src/render.ts`.
 
 ## Modules
 
@@ -105,12 +107,15 @@ from the injected `RouteFormatter`. Longest names match first to prevent shorter
 from shadowing longer names.
 
 **`render.ts`** — the output system. `renderItem(item, opts)` produces the shared markdown
-body for one API item. `renderPackage(apiPackage, opts)` walks the first entry point, builds
-a `CrossLinker` from the injected `RouteFormatter` (if any) and assembles each doc as
-injected frontmatter plus cross-linked body, returning `RenderedDoc[]`.
+body for one API item; it is untouched by filtering, which is a top-level-only concern.
+`renderPackage(apiPackage, opts)` walks the first entry point, applies the emit filter while
+building the ref registry, builds a `CrossLinker` from the injected `RouteFormatter` (if any)
+and assembles each doc as injected frontmatter plus cross-linked body, returning
+`RenderedDoc[]`. Also exports `isEmittable`, the default emit rule.
 
 **`types.ts`** — the public type surface: `ItemKindSlug`, `ApiItemRef`, `DocMeta`,
-`RouteFormatter`, `FrontmatterRenderer`, `RenderedDoc`, `RenderPackageOptions`.
+`RouteFormatter`, `FrontmatterRenderer`, `RenderedDoc`, `RenderPackageOptions` (whose
+optional `filter` predicate selects which top-level items are emitted).
 
 **`index.ts`** — barrel re-exporting the full public surface (including
 `RenderItemOptions` from `render.ts`).
@@ -122,8 +127,10 @@ injected frontmatter plus cross-linked body, returning `RenderedDoc[]`.
       ↓
   loadApiModel → ApiPackage
       ↓
-  renderPackage(pkg, { packageName, routeFor, frontmatter })
-      ↓  (per entry-point member)
+  renderPackage(pkg, { packageName, routeFor, frontmatter, filter })
+      ↓  first pass: for each entry-point member, keep = filter ?? isEmittable
+      ↓  dropped items leave BOTH the emitted docs and the crosslink ref registry
+      ↓  (per surviving member)
   renderItem → body string
       ↑ uses tsdoc.ts helpers, TypeSignatureFormatter, CrossLinker(routeFor)
       ↓
@@ -131,6 +138,9 @@ injected frontmatter plus cross-linked body, returning `RenderedDoc[]`.
       ↓
   RenderedDoc { name, kind, slug, summary, packageName, markdown }
 ```
+
+Filtering in the first pass is load-bearing: because the same kept set seeds the crosslink
+ref registry, no surviving page can link to a dropped item.
 
 The caller receives `RenderedDoc[]` and is responsible for all I/O (writing files,
 generating paths, determining output directory layout).
