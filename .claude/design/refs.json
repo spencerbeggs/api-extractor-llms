@@ -1,0 +1,11 @@
+{
+	"version": 1,
+	"refs": [
+		{
+			"source": "CLAUDE.md",
+			"target": ".claude/design/api-extractor-llms/architecture.md",
+			"hash": "2c8f1210f454d463a61098cd52d8682fe923f8bd8d280efad9b4dafbbba7e0a0",
+			"recordedAt": "2026-06-26"
+		}
+	]
+}

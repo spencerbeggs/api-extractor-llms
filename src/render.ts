@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import type { ApiDeclaredItem, ApiItem, ApiPackage } from "@microsoft/api-extractor-model";
+import type { ApiDeclaredItem, ApiExportedMixin, ApiItem, ApiPackage } from "@microsoft/api-extractor-model";
 import { ApiItemContainerMixin } from "@microsoft/api-extractor-model";
 
 import { CrossLinker } from "./cross-linker.js";
@@ -23,6 +23,15 @@ const KIND_SLUG: Readonly<Record<string, ItemKindSlug>> = {
 	Enum: "enum",
 	Namespace: "namespace",
 };
+
+/**
+ * The default emit rule for {@link renderPackage}: drop compiler-synthetic
+ * forgotten exports — items the model retains only because API Extractor ran with
+ * `includeForgottenExports: true` (e.g. the `*_base` classes TypeScript hoists for
+ * Effect class mixins). Those carry `isExported === false` on {@link ApiExportedMixin}.
+ * Every other item, including any lacking the flag, is kept.
+ */
+export const isEmittable = (item: ApiItem): boolean => (item as Partial<ApiExportedMixin>).isExported !== false;
 
 const formatter = new TypeSignatureFormatter();
 
@@ -94,10 +103,14 @@ export function renderPackage(apiPackage: ApiPackage, opts: RenderPackageOptions
 	if (!entryPoint) return [];
 
 	// First pass: build the ref registry so cross-links resolve within the package.
+	// Filtering here excludes an item from both the emitted docs and the crosslink
+	// registry, so no surviving page can link to a dropped one.
+	const keep = opts.filter ?? isEmittable;
 	const pairs: Array<{ item: ApiItem; ref: ApiItemRef }> = [];
 	for (const member of entryPoint.members) {
 		const kind = KIND_SLUG[member.kind];
 		if (kind === undefined) continue; // skip kinds we don't surface (EntryPoint, etc.)
+		if (!keep(member)) continue; // drop forgotten exports (default) or per the injected filter
 		pairs.push({ item: member, ref: { name: member.displayName, kind, slug: member.displayName.toLowerCase() } });
 	}
 

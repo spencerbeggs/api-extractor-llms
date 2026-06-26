@@ -66,11 +66,30 @@ console.log(docs[0].markdown.startsWith("---"));
 
 `routeFor` and `frontmatter` are independent. Supply either, both or neither.
 
+### Filter exports
+
+By default `renderPackage` drops compiler-synthetic forgotten exports — the `*_base` classes TypeScript hoists for Effect class mixins, which API Extractor keeps in the model when it runs with `includeForgottenExports: true`. They stay in the `.api.json` (downstream `.d.ts` reconstruction needs them) but never reach the rendered markdown. That default lives in the exported `isEmittable` predicate.
+
+Pass your own `filter` to change which top-level items are emitted. A filter that returns `true` keeps the item, both as a rendered doc and as a crosslink target. Supplying a `filter` fully replaces the default, so compose it with `isEmittable` when you want to keep the forgotten-export drop alongside your own rule.
+
+```ts
+import { isEmittable, renderPackage } from "api-extractor-llms";
+
+const docs = renderPackage(pkg, {
+  packageName: "my-pkg",
+  filter: (item) => isEmittable(item) && !item.displayName.startsWith("Internal"),
+});
+
+console.log(docs.every((d) => !d.name.startsWith("Internal")));
+// true
+```
+
 ## Features
 
 - `loadApiModel(path)` reads a `.api.json` file from disk and returns its `ApiPackage`.
-- `renderPackage(pkg, opts)` walks the first entry point and returns one `RenderedDoc` per top-level member.
+- `renderPackage(pkg, opts)` walks the first entry point and returns one `RenderedDoc` per top-level member, dropping compiler-synthetic forgotten exports unless you pass your own `filter`.
 - `renderItem(item, opts)` renders a single API item to a markdown body, with an optional `CrossLinker`.
+- `isEmittable(item)` is the default emit rule — it drops forgotten exports (`isExported === false`) and keeps everything else; compose it into a custom `filter` to keep that behaviour.
 - `CrossLinker` wraps known item names in prose with links, skipping code spans and existing links, using your injected route scheme.
 - `TypeSignatureFormatter` formats an API Extractor `Excerpt` into a clean type signature, wrapping long unions across lines.
 - TSDoc helpers — `getSummary`, `getParams`, `getReturns`, `getExamples`, `getDeprecation`, `getReleaseTag`, `hasModifierTag` and `extractPlainText` — pull plain data off an `ApiItem` with no rendering.

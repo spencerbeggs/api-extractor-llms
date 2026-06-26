@@ -6,6 +6,8 @@
  * @packageDocumentation
  */
 
+import type { ApiItem } from "@microsoft/api-extractor-model";
+
 /** URL-stable slug for an item kind, used in routes and generated doc paths. */
 export type ItemKindSlug = "class" | "interface" | "function" | "type" | "variable" | "enum" | "namespace";
 
@@ -41,4 +43,12 @@ export interface RenderPackageOptions {
 	readonly routeFor?: RouteFormatter;
 	/** Injected frontmatter. Omit → bodies only. */
 	readonly frontmatter?: FrontmatterRenderer;
+	/**
+	 * Predicate deciding whether a top-level item is emitted (and registered as a
+	 * crosslink target). Returns `true` to keep the item. Omit → the default rule
+	 * {@link isEmittable} drops compiler-synthetic forgotten exports
+	 * (`isExported === false`). Providing a filter fully replaces the default; compose
+	 * with {@link isEmittable} to retain the forgotten-export drop.
+	 */
+	readonly filter?: (item: ApiItem) => boolean;
 }

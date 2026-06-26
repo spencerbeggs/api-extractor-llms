@@ -10,8 +10,8 @@ repository.
 Source lives in `src/`: `index.ts` (public barrel), `model-loader.ts`, `render.ts`, `formatter.ts`, `cross-linker.ts`, `tsdoc.ts`, and `types.ts`.
 
 **For architecture, the load-bearing design decision, module boundaries, and data flow:**
-→ `@.claude/design/api-extractor-llms/architecture.md`
-Load when: changing the render pipeline, the injected frontmatter/route services, or module boundaries.
+→ `@./.claude/design/api-extractor-llms/architecture.md`
+Load when: changing the render pipeline, the injected frontmatter/route/filter seams, or module boundaries.
 
 ## Build Pipeline
 
