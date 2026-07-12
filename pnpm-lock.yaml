@@ -30,12 +30,13 @@ catalogs:
     '@types/node':
       specifier: ^26.1.1
       version: 26.1.1
-    '@typescript/native-preview':
-      specifier: ^7.0.0-dev.20260630.1
-      version: 7.0.0-dev.20260707.2
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
+  silkPeers:
+    '@typescript/native-preview':
+      specifier: ^7.0.0-dev.20260612.1
+      version: 7.0.0-dev.20260707.2
 
 overrides:
   '@microsoft/api-extractor>typescript': ^6.0.3
@@ -52,6 +53,9 @@ importers:
       '@microsoft/tsdoc':
         specifier: ^0.16.0
         version: 0.16.0
+      '@typescript/native-preview':
+        specifier: catalog:silkPeers
+        version: 7.0.0-dev.20260707.2
     devDependencies:
       '@savvy-web/bundler':
         specifier: ^1.1.11
@@ -62,9 +66,6 @@ importers:
       '@types/node':
         specifier: catalog:silk
         version: 26.1.1
-      '@typescript/native-preview':
-        specifier: catalog:silk
-        version: 7.0.0-dev.20260707.2
       '@vitest-agent/plugin':
         specifier: ^1.1.8
         version: 1.1.8(@vitest/coverage-istanbul@4.1.10)(@vitest/coverage-v8@4.1.10)(typescript@7.0.2)(vitest@4.1.10)
