@@ -45,10 +45,10 @@
 		"@microsoft/tsdoc": "^0.16.0"
 	},
 	"devDependencies": {
-		"@savvy-web/bundler": "^2.0.9",
-		"@savvy-web/silk": "^3.2.1",
+		"@savvy-web/bundler": "^2.0.11",
+		"@savvy-web/silk": "^3.2.3",
 		"@types/node": "catalog:silk",
-		"@vitest-agent/plugin": "^2.0.7",
+		"@vitest-agent/plugin": "^2.0.9",
 		"typescript": "catalog:silk"
 	},
 	"peerDependencies": {
