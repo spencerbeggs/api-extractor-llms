@@ -45,8 +45,8 @@
 		"@microsoft/tsdoc": "^0.16.0"
 	},
 	"devDependencies": {
-		"@savvy-web/bundler": "^2.0.13",
-		"@savvy-web/silk": "^3.2.9",
+		"@savvy-web/bundler": "^2.1.0",
+		"@savvy-web/silk": "^3.2.11",
 		"@types/node": "catalog:silk",
 		"@vitest-agent/plugin": "^2.0.10",
 		"typescript": "catalog:silk"
