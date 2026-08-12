@@ -46,9 +46,9 @@
 	},
 	"devDependencies": {
 		"@savvy-web/bundler": "^2.1.8",
-		"@savvy-web/silk": "^3.5.2",
+		"@savvy-web/silk": "^3.6.0",
 		"@types/node": "catalog:silk",
-		"@vitest-agent/plugin": "^2.1.0",
+		"@vitest-agent/plugin": "^2.2.0",
 		"typescript": "catalog:silk"
 	},
 	"peerDependencies": {
